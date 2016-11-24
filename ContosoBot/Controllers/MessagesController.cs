@@ -143,7 +143,7 @@ namespace ContosoBot
                         }
                         else
                         {
-                            replyToConversation = activity.CreateReply($"Please logoff before you try to logine");
+                            replyToConversation = activity.CreateReply($"Please logoff before you try to login");
                             await connector.Conversations.ReplyToActivityAsync(replyToConversation);
                         }
                     }
@@ -222,6 +222,8 @@ namespace ContosoBot
                         user[0].balance -= amount;
                         await AzureManager.AzureManagerInstance.UpdateUser(user[0]);
                         PersistentData.task = "";
+                        replyToConversation = activity.CreateReply($"The transaction was a success");
+                        await connector.Conversations.ReplyToActivityAsync(replyToConversation);
                         return Request.CreateResponse(HttpStatusCode.OK);
                     }
                     else if (PersistentData.task == "deposit")
@@ -245,6 +247,8 @@ namespace ContosoBot
                         user[0].balance += amount;
                         await AzureManager.AzureManagerInstance.UpdateUser(user[0]);
                         PersistentData.task = "";
+                        replyToConversation = activity.CreateReply($"The transaction was a success");
+                        await connector.Conversations.ReplyToActivityAsync(replyToConversation);
                         return Request.CreateResponse(HttpStatusCode.OK);
                     }
                     else if (PersistentData.task == "user creation")
@@ -257,13 +261,13 @@ namespace ContosoBot
                             {
                                 if (t.username == userMessage)
                                 {
-                                    replyToConversation = activity.CreateReply($"the username is taken please give me anthoer one");
+                                    replyToConversation = activity.CreateReply($"the username is taken please give me anoter one");
                                     await connector.Conversations.ReplyToActivityAsync(replyToConversation);
                                     return Request.CreateResponse(HttpStatusCode.OK);
                                 }
                             }
                             PersistentData.username = userMessage;
-                            replyToConversation = activity.CreateReply($"Please give e the password for this account");
+                            replyToConversation = activity.CreateReply($"Please give me the password for this account");
                             await connector.Conversations.ReplyToActivityAsync(replyToConversation);
                             return Request.CreateResponse(HttpStatusCode.OK);
 
