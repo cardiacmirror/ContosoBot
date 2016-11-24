@@ -28,9 +28,12 @@ namespace ContosoBot
                 HttpClient client = new HttpClient();
                 StateClient stateClient = activity.GetStateClient();
                 BotData userData = await stateClient.BotState.GetUserDataAsync(activity.ChannelId, activity.From.Id);
-                string b = await client.GetStringAsync(new Uri("https://api.projectoxford.ai/luis/v2.0/apps/48880995-76d4-47f3-80d7-aa856e73ac62?subscription-key=d706e57e79e844f58b5f7b6c1af258ea&q=" + userMessage + "&verbose=true"));
                 Luis.RootObject luisRootObject;
-                luisRootObject = JsonConvert.DeserializeObject<Luis.RootObject>(b);
+                if (PersistentData.task == "")
+                {
+                    string b = await client.GetStringAsync(new Uri("https://api.projectoxford.ai/luis/v2.0/apps/48880995-76d4-47f3-80d7-aa856e73ac62?subscription-key=d706e57e79e844f58b5f7b6c1af258ea&q=" + userMessage + "&verbose=true"));
+                    luisRootObject = JsonConvert.DeserializeObject<Luis.RootObject>(b);
+                }
                 if (userMessage.ToLower().Equals("clear") || userMessage.ToLower().Contains("logoff") || luisRootObject.topScoringIntent.intent == "logoff" )
                 {
                     await stateClient.BotState.DeleteStateForUserAsync(activity.ChannelId, activity.From.Id);
