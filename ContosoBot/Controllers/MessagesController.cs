@@ -29,12 +29,9 @@ namespace ContosoBot
                 StateClient stateClient = activity.GetStateClient();
                 BotData userData = await stateClient.BotState.GetUserDataAsync(activity.ChannelId, activity.From.Id);
                 Luis.RootObject luisRootObject;
-                if (PersistentData.task == "")
-                {
-                    string b = await client.GetStringAsync(new Uri("https://api.projectoxford.ai/luis/v2.0/apps/48880995-76d4-47f3-80d7-aa856e73ac62?subscription-key=d706e57e79e844f58b5f7b6c1af258ea&q=" + userMessage + "&verbose=true"));
-                    luisRootObject = JsonConvert.DeserializeObject<Luis.RootObject>(b);
-                }
-                if (userMessage.ToLower().Equals("clear") || userMessage.ToLower().Contains("logoff") || luisRootObject.topScoringIntent.intent == "logoff" )
+                string b = await client.GetStringAsync(new Uri("https://api.projectoxford.ai/luis/v2.0/apps/48880995-76d4-47f3-80d7-aa856e73ac62?subscription-key=d706e57e79e844f58b5f7b6c1af258ea&q=" + userMessage + "&verbose=true"));
+                luisRootObject = JsonConvert.DeserializeObject<Luis.RootObject>(b);
+                if (userMessage.ToLower().Equals("clear")  )
                 {
                     await stateClient.BotState.DeleteStateForUserAsync(activity.ChannelId, activity.From.Id);
                     PersistentData.task = "";
@@ -45,21 +42,6 @@ namespace ContosoBot
                     return Request.CreateResponse(HttpStatusCode.OK);
                 }
 
-                if (userMessage.ToLower().Equals("data"))
-                {
-                    List<Transactions> transactions = await AzureManager.AzureManagerInstance.GetTransactions();
-                    string endOutput = "";
-                    foreach (Transactions t in transactions)
-                    {
-                        endOutput += "[" + t.Date + "] Debit " + t.debit + ", Credit " + t.credit + "\n\n";
-
-
-                    }
-                    Activity infoReply = activity.CreateReply(endOutput);
-                    await connector.Conversations.ReplyToActivityAsync(infoReply);
-                    return Request.CreateResponse(HttpStatusCode.OK);
-
-                }
                 if (PersistentData.task == "")
                 {
                     Activity replyToConversation;
@@ -83,6 +65,16 @@ namespace ContosoBot
                             await connector.Conversations.ReplyToActivityAsync(replyToConversation);
                         }
 
+                    }
+                    else if (userMessage.ToLower().Contains("logoff") || luisRootObject.topScoringIntent.intent == "logoff")
+                    {
+                        await stateClient.BotState.DeleteStateForUserAsync(activity.ChannelId, activity.From.Id);
+                        PersistentData.task = "";
+                        PersistentData.username = "";
+                        PersistentData.usernameLogin = "";
+                        Activity infoReply = activity.CreateReply("data cleared");
+                        await connector.Conversations.ReplyToActivityAsync(infoReply);
+                        return Request.CreateResponse(HttpStatusCode.OK);
                     }
                     else if (userMessage.ToLower().Contains("deposit") || luisRootObject.topScoringIntent.intent =="deposit")
                     {
