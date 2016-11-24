@@ -28,7 +28,10 @@ namespace ContosoBot
                 HttpClient client = new HttpClient();
                 StateClient stateClient = activity.GetStateClient();
                 BotData userData = await stateClient.BotState.GetUserDataAsync(activity.ChannelId, activity.From.Id);
-                if (userMessage.ToLower().Equals("clear") || userMessage.ToLower().Contains("logoff"))
+                string b = await client.GetStringAsync(new Uri("https://api.projectoxford.ai/luis/v2.0/apps/48880995-76d4-47f3-80d7-aa856e73ac62?subscription-key=d706e57e79e844f58b5f7b6c1af258ea&q=" + userMessage + "&verbose=true"));
+                Luis.RootObject luisRootObject;
+                luisRootObject = JsonConvert.DeserializeObject<Luis.RootObject>(b);
+                if (userMessage.ToLower().Equals("clear") || userMessage.ToLower().Contains("logoff") || luisRootObject.topScoringIntent.intent == "logoff" )
                 {
                     await stateClient.BotState.DeleteStateForUserAsync(activity.ChannelId, activity.From.Id);
                     PersistentData.task = "";
@@ -57,13 +60,13 @@ namespace ContosoBot
                 if (PersistentData.task == "")
                 {
                     Activity replyToConversation;
-                    if (userMessage.ToLower().Contains("stock"))
+                    if (userMessage.ToLower().Contains("stock") || luisRootObject.topScoringIntent.intent == "stock")
                     {
                         PersistentData.task = "stock";
                         replyToConversation = activity.CreateReply($"Please name the company you want  to check");
                         await connector.Conversations.ReplyToActivityAsync(replyToConversation);
                     }
-                    else if (userMessage.ToLower().Contains("withdraw"))
+                    else if (userMessage.ToLower().Contains("withdraw") || luisRootObject.topScoringIntent.intent =="withdraw")
                     {
                         if(userData.GetProperty<string>("username")!= null || userData.GetProperty<string>("username") != "")
                         {
@@ -78,7 +81,7 @@ namespace ContosoBot
                         }
 
                     }
-                    else if (userMessage.ToLower().Contains("deposit"))
+                    else if (userMessage.ToLower().Contains("deposit") || luisRootObject.topScoringIntent.intent =="deposit")
                     {
                         if (userData.GetProperty<string>("username") != null || userData.GetProperty<string>("username") != "")
                         {
@@ -93,7 +96,7 @@ namespace ContosoBot
                         }
                     }
 
-                    else if (userMessage.ToLower().Contains("view transactions"))
+                    else if (userMessage.ToLower().Contains("view transactions") || luisRootObject.topScoringIntent.intent =="view transactions")
                     {
 
                         if (userData.GetProperty<string>("username") != null && userData.GetProperty<string>("username") != "")
@@ -121,7 +124,7 @@ namespace ContosoBot
 
 
                     }
-                    else if (userMessage.ToLower()=="create user")
+                    else if (userMessage.ToLower()=="create user" || luisRootObject.topScoringIntent.intent =="create user")
                     {
                         if (userData.GetProperty<string>("username") == null || userData.GetProperty<string>("username") == "")
                         {
@@ -135,7 +138,7 @@ namespace ContosoBot
                             await connector.Conversations.ReplyToActivityAsync(replyToConversation);
                         }
                     }
-                    else if (userMessage.ToLower().Contains("login"))
+                    else if (userMessage.ToLower().Contains("login") || luisRootObject.topScoringIntent.intent =="login")
                     {
                         if(userData.GetProperty<string>("username") == null || userData.GetProperty<string>("username") == "")
                         {
@@ -149,7 +152,7 @@ namespace ContosoBot
                             await connector.Conversations.ReplyToActivityAsync(replyToConversation);
                         }
                     }
-                    else if (userMessage.ToLower().Contains("clear my transaction"))
+                    else if (userMessage.ToLower().Contains("clear my transaction") || luisRootObject.topScoringIntent.intent == "clear transactions")
                     {
                         if (userData.GetProperty<string>("username") != null && userData.GetProperty<string>("username") != "")
                         {

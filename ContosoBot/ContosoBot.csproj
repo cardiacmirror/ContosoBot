@@ -141,6 +141,7 @@
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
     <Compile Include="Models\exchangeRate.cs" />
+    <Compile Include="Models\Luis.cs" />
     <Compile Include="Models\StockQuote.cs" />
     <Compile Include="Models\Transactions.cs" />
     <Compile Include="Models\Users.cs" />
